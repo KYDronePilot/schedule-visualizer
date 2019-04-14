@@ -1,65 +1,67 @@
 <!doctype html>
-<html>
-    <head>
-        <meta charset="utf-8">
-        <title>Schedule Visualizer</title>
-        <meta name="description" content="">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Schedule Visualizer</title>
+    <meta content="" name="description">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
 
-        <!-- Libs -->
-        <script src="lib/jquery/dist/jquery.min.js"></script>
+    <!-- Libs -->
+    <script src="http://cemulate.github.io/schedule-visualizer/lib/jquery/dist/jquery.min.js"></script>
 
-        <link rel="stylesheet" href="lib/foundation-sites/dist/foundation.min.css">
-        <script src="lib/foundation-sites/dist/foundation.min.js"></script>
-        <script src="lib/snapsvg/dist/snap.svg.js"></script>
-        <script src="lib/pleasejs/dist/Please.js"></script>
+    <link href="http://cemulate.github.io/schedule-visualizer/lib/foundation-sites/dist/foundation.min.css"
+          rel="stylesheet">
+    <script src="http://cemulate.github.io/schedule-visualizer/lib/foundation-sites/dist/foundation.min.js"></script>
+    <script src="http://cemulate.github.io/schedule-visualizer/lib/snapsvg/dist/snap.svg.js"></script>
+    <script src="http://cemulate.github.io/schedule-visualizer/lib/pleasejs/dist/Please.js"></script>
 
-        </script>
+    <!-- End Libs -->
 
-        </script>
-        <!-- End Libs -->
+</head>
+<body>
 
-    </head>
-    <body>
+<nav class="top-bar">
+    <div class="top-bar-left">
+        <ul class="dropdown menu" data-dropdown-menu>
+            <li class="menu-text">Schedule Visualizer</li>
+        </ul>
+    </div>
+    <div class="top-bar-right">
+        <ul class="menu">
+            <li><a href="https://github.com/cemulate/schedule-visualizer">View on Github</a></li>
+        </ul>
+    </div>
+</nav>
 
-        <div class="top-bar">
-            <div class="top-bar-left">
-                <ul class="dropdown menu" data-dropdown-menu>
-                    <li class="menu-text">Schedule Visualizer</li>
-                </ul>
-            </div>
-            <div class="top-bar-right">
-                <ul class="menu">
-                    <li><a href="https://github.com/cemulate/schedule-visualizer">View on Github</a></li>
-                </ul>
-            </div>
+<div style="height:20px"></div>
+<main>
+    <div class="row">
+        <div class="large-12 columns">
+            <svg id="canvas" style="height:450px; width:100%; min-width: 1170px;">
+
+            </svg>
         </div>
+    </div>
 
-        <div style="height:20px"></div>
+    <div style="height:20px"></div>
 
-        <div class="row">
-            <div class="large-12 columns">
-                <svg id="canvas" style="height:450px; width:100%; min-width: 1170px;">
-
-                </svg>
-            </div>
+    <div class="row">
+        <div class="large-12 columns">
+            <label for="inputText" style="font-size: 20pt;">Schedule</label>
+            <textarea id="inputText" rows="10" style="font-family: monospace"></textarea>
         </div>
+    </div>
+</main>
 
-        <div style="height:20px"></div>
-
-        <div class="row">
-            <div class="large-12 columns">
-                <textarea id="inputText" style="font-family: monospace" rows="10"></textarea>
-            </div>
+<footer>
+    <div class="row">
+        <div class="large-12 columns">
+            <a href="#" id="shareLink">Link this schedule</a>
         </div>
+    </div>
+</footer>
 
-        <div class="row">
-            <div class="large-12 columns">
-                <a id="shareLink" href="#">Link this schedule</a>
-            </div>
-        </div>
+<script src="js/app.js"></script>
 
-        <script src="js/app.js"></script>
-
-    </body>
+</body>
 </html>

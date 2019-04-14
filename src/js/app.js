@@ -1,156 +1,227 @@
-var days = ['m', 't', 'w', 'h', 'f'];
-var daynames = {'m': 'Mon', 't': 'Tue', 'w': 'Wed', 'h': 'Thu', 'f': 'Fri'};
+const days = ['m', 't', 'w', 'h', 'f'];
+const dayNames = {
+    'm': 'Mon',
+    't': 'Tue',
+    'w': 'Wed',
+    'h': 'Thu',
+    'f': 'Fri'
+};
 
+/**
+ * Create datetime object for a given time.
+ * @param s Time string
+ * @returns {Date} New datetime object
+ */
 function makeDayTime(s) {
-	return new Date("Jan 1, 1970 " + s);
+    return new Date("Jan 1, 1970 " + s);
 }
 
+/**
+ * For tracking schedule entries.
+ */
 class ScheduleItem {
-	constructor(name, place, startTime, endTime, days) {
-		this.name = name;
-		this.place = place;
-		this.startTime = startTime;
-		this.endTime = endTime;
-		this.days = days;
-	}
+    // /**
+    //  * Construct from inputted attributes.
+    //  *
+    //  * @param name Item name
+    //  * @param place Item place
+    //  * @param startTime Item starting time
+    //  * @param endTime Item ending time
+    //  * @param days Item days
+    //  */
+    // constructor(name, place, startTime, endTime, days) {
+    //     this.name = name;
+    //     this.place = place;
+    //     this.startTime = startTime;
+    //     this.endTime = endTime;
+    //     this.days = days;
+    // }
+
+    /**
+     * Construct schedule item from raw, inputted line of text.
+     *
+     * @param rawInput Raw schedule text.
+     */
+    constructor(rawInput) {
+        // Ignore if line is empty or a comment.
+        if (rawInput === "" || rawInput.charAt(0) === "#")
+            return;
+        // Split out the raw line to get each data point.
+        let [name, place, start, end, days] = rawInput.split(',').map(x => x.trim());
+        // Make datetime objects for the start and end times.
+        let startTime = makeDayTime(start);
+        let endTime = makeDayTime(end);
+        // Exit if start of end times are not
+        if (isNaN(startTime.getTime()) || isNaN(endTime.getTime()))
+            return;
+        // Set attributes.
+        this.name = name;
+        this.place = place;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.days = Array.from(days);
+    }
 }
 
+/**
+ * For rendering a schedule.
+ */
 class ScheduleRenderer {
-	constructor(canvas, startTime, endTime, cwidth, cheight) {
-		this.canvas = canvas;
-		this.items = [];
+    constructor(canvas, startTime, endTime, cwidth, cheight) {
+        // Canvas to display schedule
+        this.canvas = canvas;
+        // Schedule items
+        this.items = [];
 
-		this.cwidth = cwidth;
-		this.cheight = cheight;
+        // Canvas width
+        this.cwidth = cwidth;
+        // Canvas height
+        this.cheight = cheight;
 
-		this._ox = 60;
-		this._oy = 8;
-		this._realWidth = cwidth - 68;
-		this._realHeight = cheight - 28;
+        this._ox = 60;
+        this._oy = 8;
+        this._realWidth = cwidth - 68;
+        this._realHeight = cheight - 28;
 
-		this.startTime = startTime;
-		this.endTime = endTime;
-	}
+        this.startTime = startTime;
+        this.endTime = endTime;
+    }
 
-	addItem(item) {
-		this.items.push(item);
-	}
+    /**
+     * Add an item to the schedule.
+     *
+     * @param item Schedule item
+     */
+    addItem(item) {
+        this.items.push(item);
+    }
 
-	clearItems() {
-		this.items = [];
-	}
+    /**
+     * Clear items in the schedule.
+     */
+    clearItems() {
+        this.items = [];
+    }
 
-	setItemsFromString(s) {
-		this.clearItems();
-        for (var line of s.split("\n")) {
-            if (line == "" || line.charAt(0) == "#") continue;
-
-			var [name, place, start, end, days] = line.split(',').map(x => x.trim());
-			var startTime = makeDayTime(start);
-			var endTime = makeDayTime(end);
-			if (isNaN(startTime.getTime()) || isNaN(endTime.getTime())) return false;
-            this.addItem(new ScheduleItem(name, place, makeDayTime(start), makeDayTime(end), Array.from(days)));
+    /**
+     * Add schedule item from an inputted string.
+     *
+     * @param s The inputted string.
+     * @returns {boolean}
+     */
+    setItemsFromString(s) {
+        this.clearItems();
+        for (let line of s.split("\n")) {
+            // if (line == "" || line.charAt(0) == "#") continue;
+            //
+            // var [name, place, start, end, days] = line.split(',').map(x => x.trim());
+            // var startTime = makeDayTime(start);
+            // var endTime = makeDayTime(end);
+            // if (isNaN(startTime.getTime()) || isNaN(endTime.getTime())) return false;
+            let newItem = new ScheduleItem(line);
+            console.log(newItem);
+            this.addItem(newItem);
         }
-		return true;
-	}
+        return true;
+    }
 
-	drawGrid() {
-		var d = new Date(this.startTime);
-		while (this.endTime - d > 0) {
-			var x = this._ox + (d - this.startTime) / (this.endTime - this.startTime) * this._realWidth;
-			var line = this.canvas.line(x, 0, x, this.cheight);
-			line.attr({
-				stroke: "gray",
-				strokeWidth: 1
-			});
-			var text = this.canvas.text(x + 5, this.cheight, d.getHours() == 12 ? 12 : d.getHours() % 12);
-			d.setHours(d.getHours() + 1);
-		}
+    drawGrid() {
+        var d = new Date(this.startTime);
+        while (this.endTime - d > 0) {
+            var x = this._ox + (d - this.startTime) / (this.endTime - this.startTime) * this._realWidth;
+            var line = this.canvas.line(x, 0, x, this.cheight);
+            line.attr({
+                stroke: "gray",
+                strokeWidth: 1
+            });
+            var text = this.canvas.text(x + 5, this.cheight, d.getHours() == 12 ? 12 : d.getHours() % 12);
+            d.setHours(d.getHours() + 1);
+        }
 
-		for (var day of days.slice(1)) {
-			var y = this._oy + days.indexOf(day) / 5 * this._realHeight;
-			var line = this.canvas.line(0, y, this.cwidth, y);
-			line.attr({
-				stroke: "gray",
-				strokeWidth: 1
-			});
-		}
+        for (var day of days.slice(1)) {
+            var y = this._oy + days.indexOf(day) / 5 * this._realHeight;
+            var line = this.canvas.line(0, y, this.cwidth, y);
+            line.attr({
+                stroke: "gray",
+                strokeWidth: 1
+            });
+        }
 
-		for (var day of days) {
-			var y = this._oy + days.indexOf(day) / 5 * this._realHeight;
-			var text = this.canvas.text(5, y+18, daynames[day]);
-		}
-	}
+        for (var day of days) {
+            var y = this._oy + days.indexOf(day) / 5 * this._realHeight;
+            var text = this.canvas.text(5, y + 18, dayNames[day]);
+        }
+    }
 
-	drawItem(item) {
-		var color = Please.make_color();
-		for (var d of item.days) {
-			var xs = this._ox + (item.startTime - this.startTime) / (this.endTime - this.startTime) * this._realWidth;
-			var xe = this._ox + (item.endTime - this.startTime) / (this.endTime - this.startTime) * this._realWidth;
-			var ys = this._oy + days.indexOf(d) / 5 * this._realHeight + 6;
+    drawItem(item) {
+        var color = Please.make_color();
+        for (var d of item.days) {
+            var xs = this._ox + (item.startTime - this.startTime) / (this.endTime - this.startTime) * this._realWidth;
+            var xe = this._ox + (item.endTime - this.startTime) / (this.endTime - this.startTime) * this._realWidth;
+            var ys = this._oy + days.indexOf(d) / 5 * this._realHeight + 6;
 
-			var r = this.canvas.rect(xs,ys,xe-xs,this._realHeight/5 - 12, 5, 5);
-			r.attr({
-				fill: color,
-				stroke: "#000000",
-				strokeWidth: 4
-			});
+            var r = this.canvas.rect(xs, ys, xe - xs, this._realHeight / 5 - 12, 5, 5);
+            r.attr({
+                fill: color,
+                stroke: "#000000",
+                strokeWidth: 4
+            });
 
-			var name = this.canvas.text(xs+5, ys+18, item.name).addClass("item-text");
-			var place = this.canvas.text(xs+5, ys+38, item.place).addClass("item-text");
-		}
-	}
+            var name = this.canvas.text(xs + 5, ys + 18, item.name).addClass("item-text");
+            var place = this.canvas.text(xs + 5, ys + 38, item.place).addClass("item-text");
+        }
+    }
 
-	render() {
-		this.canvas.clear();
-		this.drawGrid();
-		for (var item of this.items) {
-			this.drawItem(item);
-		}
-		this.canvas.selectAll("text").attr({
-			fontFamily: "monospace",
-			fontSize: 15
-		});
-		this.canvas.selectAll(".item-text").attr({
-			fontSize: 12
-		});
-	}
+    render() {
+        this.canvas.clear();
+        this.drawGrid();
+        for (var item of this.items) {
+            this.drawItem(item);
+        }
+        this.canvas.selectAll("text").attr({
+            fontFamily: "monospace",
+            fontSize: 15
+        });
+        this.canvas.selectAll(".item-text").attr({
+            fontSize: 12
+        });
+    }
 }
 
-$(document).ready(function() {
-	var renderer = new ScheduleRenderer(Snap("#canvas"), makeDayTime("7:00 AM"), makeDayTime("7:00 PM"), $("#canvas").width(), $("#canvas").height());
-	renderer.render();
-	var hash = window.location.hash ? window.location.hash.substring(1) : null;
+$(document).ready(function () {
+    var renderer = new ScheduleRenderer(Snap("#canvas"), makeDayTime("7:00 AM"), makeDayTime("7:00 PM"), $("#canvas").width(), $("#canvas").height());
+    renderer.render();
+    var hash = window.location.hash ? window.location.hash.substring(1) : null;
 
-	var sString = null;
-	if (hash != null) {
-		sString = atob(hash);
-		renderer.setItemsFromString(sString);
-		renderer.render();
-	}
+    var sString = null;
+    if (hash != null) {
+        sString = atob(hash);
+        renderer.setItemsFromString(sString);
+        renderer.render();
+    }
 
-	$("#inputText").keydown(e => {
-		if (e.keyCode == 13 && e.ctrlKey) {
-			var text = $("#inputText").val();
-			text = text.split('\n').filter(line => !(line == "" || line.startsWith('#'))).join('\n');
-			var success = renderer.setItemsFromString(text);
-			if (!success) alert("Malformed input");
-			renderer.cwidth = $("#canvas").width();
-			renderer.cheight = $("#canvas").height();
-			renderer.render();
+    $("#inputText").keydown(e => {
+        if (e.keyCode == 13 && e.ctrlKey) {
+            var text = $("#inputText").val();
+            text = text.split('\n').filter(line => !(line == "" || line.startsWith('#'))).join('\n');
+            var success = renderer.setItemsFromString(text);
+            if (!success) alert("Malformed input");
+            renderer.cwidth = $("#canvas").width();
+            renderer.cheight = $("#canvas").height();
+            renderer.render();
 
-			var encoded = btoa(text);
-			$("#shareLink").attr("href", "#" + encoded);
+            var encoded = btoa(text);
+            $("#shareLink").attr("href", "#" + encoded);
 
-			e.preventDefault();
-		}
-	});
+            e.preventDefault();
+        }
+    });
 
-	var text = `# Enter classes using the following format (lines starting with # are ignored). Use Ctrl-Enter to display.
+    var text = `# Enter classes using the following format (lines starting with # are ignored). Use Ctrl-Enter to display.
 # Class, Location, 8:00 AM, 8:50 AM, mwf
-# Class, Location, 11:00 AM, 12:15 PM, th`
-	text = sString ? text + '\n' + sString : text;
+# Class, Location, 11:00 AM, 12:15 PM, th`;
+    text = sString ? text + '\n' + sString : text;
 
-	$("#inputText").val(text);
+    $("#inputText").val(text);
 
 });
